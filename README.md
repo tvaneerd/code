@@ -1,5 +1,8 @@
 # code
 
+A place to put random bits of code.
+
+
 ### StrongId
 
 A template for making ID types that are unique types for unique uses. ie WidgetIds are not the same as EmployeeIds, and it is nice if the compiler prevents you from mixing one with the other.
