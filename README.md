@@ -24,6 +24,9 @@ A template for making ID types that are unique types for unique uses. ie WidgetI
         char test(CatName const & x);
         long test(...);
 
+        // that test(DogName()) returns a long, not a char,
+        // implies that DogName doesn't convert into a CatName const &,
+        // ie this static assert checks that they are different types
         static_assert(std::is_same<long, decltype(test(DogName()))>::value);
     }
 
