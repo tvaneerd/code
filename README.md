@@ -31,5 +31,34 @@ A template for making ID types that are unique types for unique uses. ie WidgetI
     }
 
 
+### sample()
+
+Similar to C++17 `std::sample()` but I don't have C++17 yet.  And I like the `out()`function better than an output iterator.
+
+This is one of the functions in sample.h, but it also is an example of how to use the generic `sample(beg,end,count,urng,out)` function.
+
+    template<typename T, typename Transform>
+    std::vector<T> sample(std::vector<T> const & in, int count, Transform const & transform)
+    {
+        std::vector<T> out;
+        if (in.size() < count)
+            out = in;
+        else {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            out.reserve(count);
+            sample(in.begin(), in.end(), count, gen, [&transform, &out](T const & elem) { out.push_back(transform(elem)); });
+        }
+        return out;
+    }
+
+And then how to use the nice and easy version:
+
+    float estimateThreshold(std::vector<float> const & errors)
+    {
+        std::vector<float> absErrs = sample(errors, maxSampleSize, [](float val) {return abs(val);});
+        
+        ... do stuff with sample ...
+    }
 
 
