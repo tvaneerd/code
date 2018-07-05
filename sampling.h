@@ -55,15 +55,17 @@ template<typename T, typename Transform>
 std::vector<T> sample(std::vector<T> const & vin, int count, Transform const & transform)
 {
     std::vector<T> out;
-    if (vin.size() < count)
-        out = vin;
-    else {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        out.reserve(count);
-        stable_sample(vin.begin(), vin.end(), count, gen, [&transform, &out](T const & elem) { out.push_back(transform(elem)); });
-    }
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    out.reserve(std::min(count, (int)vin.size()));
+    stable_sample(vin.begin(), vin.end(), count, gen, [&transform, &out](T const & elem) { out.push_back(transform(elem)); });
     return out;
+}
+
+template<typename T>
+std::vector<T> sample(std::vector<T> const & vin, int count)
+{
+    return sample(vin, count, [](T const & x) {return x; });
 }
 
 #endif // _h
