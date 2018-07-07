@@ -10,7 +10,7 @@
 // similar to std::sample() coming in C++17
 // Note that this maintains the order of the selected samples, thus "stable"_sample
 template <typename Iterator, typename Sentinel, typename UniformRandomNumberGenerator, typename Output>
-void stable_sample(Iterator begin, Sentinel end, int sampleSize, UniformRandomNumberGenerator& urng, Output & out)
+void stable_sample(Iterator begin, Sentinel end, int sampleSize, UniformRandomNumberGenerator& urng, Output const & out)
 {
     auto left = std::distance(begin, end); // how many left to choose from
     using DistType = decltype(left);
@@ -51,21 +51,44 @@ void stable_sample(Iterator begin, Sentinel end, int sampleSize, UniformRandomNu
     }
 }
 
-template<typename T, typename Transform>
-std::vector<T> sample(std::vector<T> const & vin, int count, Transform const & transform)
+// returns a vector<X> where X is whatever transform returns
+template <typename T, typename UniformRandomNumberGenerator, typename Transform>
+auto sample(std::vector<T> const & vin, int count, UniformRandomNumberGenerator & urng, Transform const & transform)
+    -> std::vector<std::decay_t<decltype(transform(std::declval<T>()))>>
 {
-    std::vector<T> out;
+    std::vector<std::decay_t<decltype(transform(std::declval<T>()))>> vout;
+    vout.reserve(std::min(count, (int)vin.size()));
+    stable_sample(vin.begin(), vin.end(), count, urng, [&transform, &vout](T const & elem) { vout.push_back(transform(elem)); });
+    return vout;
+}
+
+// returns a vector<X> where X is whatever transform returns
+template<typename T, typename Transform>
+auto sample(std::vector<T> const & vin, int count, Transform const & transform) -> std::vector<std::decay_t<decltype(transform(std::declval<T>()))>>
+{
     std::random_device rd;
-    std::mt19937 gen(rd());
-    out.reserve(std::min(count, (int)vin.size()));
-    stable_sample(vin.begin(), vin.end(), count, gen, [&transform, &out](T const & elem) { out.push_back(transform(elem)); });
-    return out;
+    std::mt19937 urng(rd());
+    return sample(vin, count, urng, transform);
 }
 
 template<typename T>
 std::vector<T> sample(std::vector<T> const & vin, int count)
 {
-    return sample(vin, count, [](T const & x) {return x; });
+    return sample(vin, count, [](T const & x) -> T const & {return x; });
+}
+
+// modifies input vector, resizes down to count
+template<typename T>
+void downsample(std::vector<T> & vec, int count)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    // since stable_sample goes in order,
+    // we can overwrite the vector as we go;
+    // we are always overwriting at the place just read, or farther back, never ahead.
+    int i = 0;
+    stable_sample(vec.begin(), vec.end(), count, gen, [&vec, &i](T const & elem) { vec[i++] = elem; });
+    vec.resize(i); // i might not == count (ie when size() < count, which means we didn't need to resize, but i is always correct!)
 }
 
 #endif // _h
