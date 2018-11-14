@@ -2,6 +2,10 @@
 
 A place to put random bits of code.
 
+- StrongId
+- Unit
+- sample()
+
 
 ### StrongId
 
@@ -61,4 +65,42 @@ And then how to use the nice and easy version:
         ... do stuff with sample ...
     }
 
+
+### Unit
+
+    using Apples = Unit<int, struct ApplesTag>;
+    using Oranges = Unit<int, struct OrangesTag>;
+    
+    Apples apples(17);
+    Oranges oranges(17);
+    
+    apples == oranges; // does not compile - can't compare Apples and Oranges
+    // also can't add them, multiply them, etc
+    // but can scale them:
+    apples = apples * 3; // 3 times as many apples!
+    // and add, etc
+    apples = apples + apples; // moar apples
+
+    int f(Apples);
+    int x = f(17); // doesn't compile - no conversion
+    int y = f(oranges); // doesn't compile - no conversion
+    
+For units you want to be able to mix, like radians and degrees:
+
+    struct Radians;
+    struct Degrees;
+
+    struct Radians : UnitBase<double, Radians>
+    {
+        explicit Radians(double t) : UnitBase(t) {}
+        inline /*implicit*/ Radians(Degrees d);
+    };
+    struct Degrees : UnitBase<double, Degrees>
+    {
+        explicit Degrees(double t) : UnitBase(t) {}
+        inline /*implicit*/ Degrees(Radians r);
+    };
+
+    inline /*implicit*/ Degrees::Degrees(Radians r) : UnitBase(r.get() * (180 / std::math::pi)) {}
+    inline /*implicit*/ Radians::Radians(Degrees d) : UnitBase(d.get() * (std::math::pi / 180)) {}
 
