@@ -29,6 +29,11 @@ struct UnitBase
     Derived operator-() const { return Derived{ -value }; }
     Derived operator+() const { return Derived{ value }; }
     // Note the lack of Unit * Unit, as that would need to return a different Unit type!
+    
+    friend Derived & operator+=(UnitBase b) { a.value += b.value; return *this; }
+    friend Derived & operator-=(UnitBase b) { a.value -= b.value; return *this; }
+    friend Derived & operator*=(Scalar b) { a.value *= b; return * this; }
+    friend Derived & operator/=(Scalar b) { a.value /= b; return * this; }
 
     friend bool operator==(UnitBase a, UnitBase b) { return a.get() == b.get(); }
     friend bool operator!=(UnitBase a, UnitBase b) { return a.get() != b.get(); }
