@@ -81,6 +81,9 @@ std::vector<T> sample(std::vector<T> const & vin, int count)
 template<typename T>
 void downsample(std::vector<T> & vec, int count)
 {
+    if ((int)vec.size() <= count)
+        return;
+    
     std::random_device rd;
     std::mt19937 gen(rd());
     // since stable_sample goes in order,
