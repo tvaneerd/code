@@ -44,8 +44,8 @@ struct Degrees : UnitBase<double, Degrees>
     static Degrees atan2(double y, double x) { return Radians(std::atan2(y, x)); }
 };
 
-inline /*implicit*/ Degrees::Degrees(Radians r) : UnitBase(57.2957795131 * r.get()) {}
-inline /*implicit*/ Radians::Radians(Degrees d) : UnitBase(0.017453292 * d.get()) {}
+inline /*implicit*/ Degrees::Degrees(Radians r) : UnitBase((180/3.14159265359) * r.get()) {}
+inline /*implicit*/ Radians::Radians(Degrees d) : UnitBase((3.14159265359/180) * d.get()) {}
 inline double Radians::degrees() const { return Degrees(*this).get(); }
 inline double Degrees::radians() const { return Radians(*this).get(); }
 
