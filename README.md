@@ -6,6 +6,8 @@ A place to put random bits of code.
 - Unit
 - sample()
 
+Short descriptions below; see the [wiki](wiki) for more indepth descriptions.
+
 
 ### StrongId
 
