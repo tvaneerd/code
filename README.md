@@ -14,8 +14,10 @@ Short descriptions below; see the [wiki](wiki) for more indepth descriptions.
 A template for making ID types that are unique types for unique uses. ie WidgetIds are not the same as EmployeeIds, and it is nice if the compiler prevents you from mixing one with the other.
 
 
-    using FooId = StrongId<int, struct FooTag>;
-    using BarId = StrongId<int, struct BarTag>;
+    struct FooTag;
+    using FooId = StrongId<int, FooTag>;
+    struct BarTag;
+    using BarId = StrongId<int, BarTag>;
     
     template <typename Tag>
     using StringId = StrongId<std::string, Tag>;
@@ -36,6 +38,7 @@ A template for making ID types that are unique types for unique uses. ie WidgetI
         static_assert(std::is_same<long, decltype(test(DogName()))>::value);
     }
 
+(P.S. Note that you could do a one-line version where you embed the `struct FooTag` declaration: `using FooId = StrongId<int, struct FooTag>;`. Don't do that. You can get strange ADL repercussions. There was a C++Now 2021 lightning talk about this...)
 
 ### Unit
 
