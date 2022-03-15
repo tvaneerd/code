@@ -138,7 +138,7 @@ And then how to use the nice and easy version:
 
 ### any_tidy_ptr
 
-`any_tidy_ptr<T>` is basically a unique_ptr with a std::function as its deleter.
+`any_tidy_ptr<T>` is basically a unique_ptr with a std::function as its deleter. (And like unique_ptr, it is move-only.)
 
 But it is great!
 
@@ -150,5 +150,16 @@ I much prefer unique_ptr (because sharing is actually usually bad). But I need t
 
 And by the way, any_tidy_ptr can hold a shared_ptr! It does the right thing (which is to decrement that ref count when the any_tidy_ptr goes away).
 
+#### An example use case:
+
+I have an Image class. It holds (and, typically, owns!) pixels.
+
+But every once in a while I need to wrap a buffer of pixels into an Image temporarily, without copying the pixels.  Then do Image processing on the buffer, then delete the Image without the buffer going away (because the Image didn't own the pixels in this case).
+
+Now, that is, in fact, bad, dangerous, etc. It breaks the rules of Image (which should own the pixels).  But sometimes performance is queen, and we bow to her.
+
+So, Image uses an any_tidy_ptr to hold the pixels, and, in this case, the deleter is empty - because it doesn't own the pixels.
+
+And on other occasions, maybe it shares the pixels with another Image (via shared_ptr to any_tidy_ptr conversion). Again, for performance.
 
 
