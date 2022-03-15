@@ -162,4 +162,19 @@ So, Image uses an any_tidy_ptr to hold the pixels, and, in this case, the delete
 
 And on other occasions, maybe it shares the pixels with another Image (via shared_ptr to any_tidy_ptr conversion). Again, for performance.
 
+### any_movable
 
+Very much like `std::any`, but for move-only types.
+
+Also, has a wonderful-awful idea of being able to hold a `Derived` and get it back as a pointer to `Base`.  Which `std::any` can NOT do!
+
+(And which, sadly, uses try-catch to figure out the Base-Derived relationship, because a normal dynamic_cast doesn't work here. Did I mention "wonderful-awful"?)
+
+```
+any_movable a = Derived();
+
+Base & b = any_dynamic_cast<Base>(a);  // works!
+
+NotBase & nb = any_dynamic_cast<NotBase>(a); // throws std::bad_any_cast
+int & r = any_dynamic_cast<int>(a); // also throws
+```
