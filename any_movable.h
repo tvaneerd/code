@@ -29,6 +29,7 @@ class any_movable
         virtual bool can_assign() const { return true; } // you can assign nothing to nothing!
         virtual void move_assign(void * data) { }
         virtual void youveGotToThrowItThrowIt() const { throw getItem(); } //nullptr!
+        virtual bool isClass() const { return false; } // is the type you are holding a class or non-class
     };
     // Implement Base for each T
     template<typename T>
@@ -69,6 +70,10 @@ class any_movable
         virtual void youveGotToThrowItThrowIt() const
         {
             throw const_cast<T *>(reinterpret_cast<T const *>(getItem())); // so evil!
+        }
+        virtual bool isClass() const
+        {
+            return std::is_class_v<T>;
         }
     };
 
@@ -211,8 +216,8 @@ public:
     template<typename T>
     bool has_dynamic_type() const
     {
-        // this is slow
-        return try_as_base<T>() != nullptr;
+        // try_as_base is slow, last resort
+        return has_type<T>() || (try_as_base<T>() != nullptr);
     }
 
     template <typename T>

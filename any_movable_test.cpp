@@ -518,6 +518,97 @@ namespace UnitTestCommon
         EXPECT_EQ(23, x);
     }
 
+    TEST(any_movable, any_dynamic_cast_holding_NOT_derived_throws)
+    {
+        int x = 0;
+        struct Base
+        {
+            int & r;
+            Base(int & r) : r(r) {}
+            virtual void set() { r = 17; }
+        };
+        struct Derived // NOT derived from base : Base
+        {
+        };
+
+        any_movable a = Derived();
+        EXPECT_THROW(Base & b = any_dynamic_cast<Base>(a), std::bad_any_cast);
+    }
+
+    TEST(any_movable, any_dynamic_cast_holding_correct_nonclass_returns)
+    {
+        any_movable a = 17;
+        int & r = any_dynamic_cast<int>(a);
+        EXPECT_EQ(17, r);
+        a = 23;
+        EXPECT_EQ(23, r);
+    }
+
+    TEST(any_movable, any_dynamic_cast_holding_correct_nonclass_throws)
+    {
+        any_movable a = 17;
+        EXPECT_THROW(double & d = any_dynamic_cast<double>(a), std::bad_any_cast);
+    }
+
+    TEST(any_movable, has_dynamic_type_returns_true_for_Base)
+    {
+        struct Base {};
+        struct Derived : Base {};
+        any_movable a = Derived();
+        EXPECT_TRUE(a.has_dynamic_type<Base>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_true_for_Derived)
+    {
+        struct Base {};
+        struct Derived : Base {};
+        any_movable a = Derived();
+        EXPECT_TRUE(a.has_dynamic_type<Derived>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_true_for_Middle)
+    {
+        struct Base {};
+        struct Middle : Base {};
+        struct Derived : Middle {};
+        any_movable a = Derived();
+        EXPECT_TRUE(a.has_dynamic_type<Middle>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_true_for_nondynamic_cases)
+    {
+        any_movable a = 17;
+        EXPECT_TRUE(a.has_dynamic_type<int>());
+    }
+
+    TEST(any_movable, has_dynamic_type_returns_false_for_NonBase)
+    {
+        struct Base {};
+        struct Derived : Base {};
+        struct NonBase {};
+        any_movable a = Derived();
+        EXPECT_FALSE(a.has_dynamic_type<NonBase>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_false_for_OtherDerived)
+    {
+        struct Base {};
+        struct Derived : Base {};
+        struct OtherDerived : Base {};
+        any_movable a = Derived();
+        EXPECT_FALSE(a.has_dynamic_type<OtherDerived>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_false_for_NonMiddle)
+    {
+        struct Base {};
+        struct Middle : Base {};
+        struct NonMiddle : Base {};
+        struct Derived : Middle {};
+        any_movable a = Derived();
+        EXPECT_FALSE(a.has_dynamic_type<NonMiddle>());
+    }
+    TEST(any_movable, has_dynamic_type_returns_false_for_nondynamic_cases)
+    {
+        any_movable a = 17;
+        EXPECT_FALSE(a.has_dynamic_type<double>());
+    }
+
 
 
 
