@@ -136,4 +136,19 @@ And then how to use the nice and easy version:
         ... do stuff with sample ...
     }
 
+### any_tidy_ptr
+
+`any_tidy_ptr<T>` is basically a unique_ptr with a std::function as its deleter.
+
+But it is great!
+
+There are many times where I need to own a pointer to something, but I don't want the deleter to be part of the type of the pointer - I don't care how it gets deleted, as long as it happens.
+
+You could use shared_ptr for this, because it already type-erases the deleter.  But shared_ptr implies... sharing! Go figure.
+
+I much prefer unique_ptr (because sharing is actually usually bad). But I need the deletion to be more run-timey.
+
+And by the way, any_tidy_ptr can hold a shared_ptr! It does the right thing (which is to decrement that ref count when the any_tidy_ptr goes away).
+
+
 
